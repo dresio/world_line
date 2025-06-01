@@ -1,14 +1,8 @@
 name: Deploy to GitHub Pages
 
 on:
-  workflow_call:
-    inputs:
-      tag:
-        required: true
-        type: string
   push:
-    tags:
-      - "*"
+    branches: [main]
 
 permissions:
   contents: write
@@ -40,7 +34,7 @@ jobs:
           cargo install wasm-bindgen-cli
           cargo install wasm-opt
 
-      # Build with trunk from web_frontend directory
+      # Build with bevy cli
       - name: Build and run
         run: |
           bevy build --release web --bundle
@@ -59,27 +53,3 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      # Install butler for deploying to itch
-      - name: Install butler
-        run: |
-          curl -L -o butler.zip https://broth.itch.ovh/butler/linux-amd64/LATEST/archive/default
-          unzip butler.zip
-          chmod +x butler
-          ./butler -V
-
-      # Uploads to itch.io
-      - name: Upload to itch.io
-        env:
-          BUTLER_API_KEY: ${{ secrets.BUTLER_CREDENTIALS }}
-        run: |
-          for channel in $(ls builds); do
-            if [ "$channel" = "github-pages" ]; then
-              continue
-            fi
-            ./butler push \
-              --fix-permissions \
-              --userversion="${{ inputs.tag }}" \
-              builds/$channel/* \
-              dresio/world-line:$channel
-          done
