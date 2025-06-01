@@ -81,5 +81,5 @@ jobs:
               --fix-permissions \
               --userversion="${{ inputs.tag }}" \
               builds/$channel/* \
-              ${{ dresio/world-line }}:$channel
+              dresio/world-line:$channel
           done
