@@ -24,7 +24,6 @@ This project is planning on utilizing a handful of external crates to make devel
 - [skein](https://github.com/rust-adventure/skein): Helps with loading 3D assets and level design
 - [avian](https://github.com/Jondolf/avian): Provides physics engine
 - [bevy tnua](https://github.com/idanarye/bevy-tnua): Character controller compatible with the avian crate
-- [bevy enhanced input](https://github.com/projectharmonia/bevy_enhanced_input): Robust input handling
 - [bevy simple subsystem](https://github.com/TheBevyFlock/bevy_simple_subsecond_system): Better debugging with hot loading
 - [bevy asset loader](https://github.com/NiklasEi/bevy_asset_loader): For loading all assets that are not pulled from skein
 
