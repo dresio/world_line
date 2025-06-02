@@ -1,16 +1,14 @@
-pub mod world;
-pub mod player;
 pub mod controls;
+pub mod player;
+pub mod world;
 
 use avian3d::prelude::*;
 use bevy_tnua::prelude::*;
-use bevy_tnua_avian3d::{TnuaAvian3dPlugin};
+use bevy_tnua_avian3d::TnuaAvian3dPlugin;
 
 // Bevy blender integration
 use bevy::{prelude::*, scene::SceneInstanceReady};
 use bevy_skein::SkeinPlugin;
-
-use bevy_simple_subsecond_system::prelude::*;
 
 fn main() {
     App::new()
@@ -21,12 +19,10 @@ fn main() {
             PhysicsPlugins::default(),
             TnuaAvian3dPlugin::new(FixedUpdate),
             TnuaControllerPlugin::new(FixedUpdate),
-
             // Added code
             world::World,
             player::Player,
             controls::Controller,
-            // SimpleSubsecondPlugin::default(),    //Comment out when deploying for web
         ))
         .add_observer(
             // log the component from the gltf spawn
