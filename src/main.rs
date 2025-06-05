@@ -1,3 +1,4 @@
+pub mod blender_helpers;
 pub mod controls;
 pub mod player;
 pub mod world;
@@ -7,12 +8,13 @@ use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::TnuaAvian3dPlugin;
 
 // Bevy blender integration
-use bevy::{prelude::*, scene::SceneInstanceReady};
+use bevy::{prelude::*, scene::SceneInstanceReady, winit::WinitSettings};
 use bevy_skein::SkeinPlugin;
 
 fn main() {
     App::new()
-        .register_type::<player::Player>()
+        .register_type::<player::PlayerTop>()
+        .register_type::<player::PlayerBottom>()
         .add_plugins((
             DefaultPlugins,
             SkeinPlugin::default(),

@@ -39,8 +39,8 @@ fn apply_movement(
     }
 
     controller.basis(TnuaBuiltinWalk {
-        desired_velocity: direction * 50.0,
-        float_height: 18.0,
+        desired_velocity: direction * 80.0,
+        float_height: 4.5,
         ..Default::default()
     });
 }
