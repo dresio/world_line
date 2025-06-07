@@ -1,5 +1,7 @@
 pub mod blender_helpers;
 pub mod controls;
+pub mod enemy;
+pub mod factions;
 pub mod player;
 pub mod world;
 
@@ -23,21 +25,9 @@ fn main() {
             TnuaControllerPlugin::new(FixedUpdate),
             // Added code
             world::World,
-            player::Player,
+            player::PlayerPlugin,
             controls::Controller,
+            PhysicsDebugPlugin::default(),
         ))
-        .add_observer(
-            // log the component from the gltf spawn
-            |trigger: Trigger<SceneInstanceReady>,
-             children: Query<&Children>,
-             characters: Query<&player::Player>| {
-                for entity in children.iter_descendants(trigger.target()) {
-                    let Ok(character) = characters.get(entity) else {
-                        continue;
-                    };
-                    info!(?character);
-                }
-            },
-        )
         .run();
 }

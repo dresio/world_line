@@ -21,7 +21,7 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands
         .spawn(SceneRoot(asset_server.load(
             // Change this to your exported gltf file
-            GltfAssetLabel::Scene(0).from_asset("TestScene.glb"),
+            GltfAssetLabel::Scene(1).from_asset("TestScene.glb"),
         )))
         .observe(crate::blender_helpers::load_blender_data);
 }

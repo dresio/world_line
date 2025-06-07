@@ -40,7 +40,9 @@ fn apply_movement(
 
     controller.basis(TnuaBuiltinWalk {
         desired_velocity: direction * 80.0,
-        float_height: 4.5,
+        float_height: 11.0,
         ..Default::default()
     });
 }
+
+fn fire_laser() {}

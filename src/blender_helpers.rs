@@ -15,14 +15,26 @@ pub fn load_blender_data(
         };
 
         let Ok(data) = serde_json::from_str::<BMeshExtras>(&gltf_mesh_extras.value) else {
-            error!("Issue with collider format on extra blender data");
+            // error!("Issue with collider format on extra blender data");
+            // dbg!(gltf_mesh_extras);
             continue;
         };
+
+        let mut rb_property = RigidBody::Static;
+
+        match data.rigidbody {
+            Some(property) => match property {
+                BRigidBody::Dynamic => rb_property = RigidBody::Dynamic,
+                BRigidBody::Static => rb_property = RigidBody::Static,
+            },
+            None => {} //Do Nothing,
+        };
+
         match data.collider {
             BCollider::TrimeshFromMesh => {
                 commands
                     .entity(entity)
-                    .insert((RigidBody::Static, ColliderConstructor::TrimeshFromMesh));
+                    .insert((rb_property, ColliderConstructor::TrimeshFromMesh));
             }
         }
     }
@@ -31,9 +43,16 @@ pub fn load_blender_data(
 #[derive(Serialize, Deserialize, Debug)]
 struct BMeshExtras {
     pub collider: BCollider,
+    pub rigidbody: Option<BRigidBody>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 enum BCollider {
     TrimeshFromMesh,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+enum BRigidBody {
+    Dynamic,
+    Static,
 }
