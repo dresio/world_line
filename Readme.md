@@ -6,7 +6,7 @@ This is a game for submission in the Bevy 6 Game Jam with the theme of Chain Rea
 
 ## Theme
 
-The theme of this game jam is Chain Reaction, and I am hoping to hit this in two different ways. One is extremely straight forward with lots of explosions and such literally creating chain reactions, and a deeper meaning by making the interactions you have with the world impact the story
+The theme of this game jam is Chain Reaction, ~~and I am hoping to hit this in two different ways. One is extremely straight forward with lots of explosions and such literally creating chain reactions, and a deeper meaning by making the interactions you have with the world impact the story~~. So that was a bit ambitious with my first dive into bevy and I have barely implemented a controllable character and shooting mechanics with 12 hours remaining. I will attempt to restructure a bit where the mech instead has a large cool-down between shots, and the enemies are swarming and the goal is to survive for as long as possible. Killing an enemy will make them explode (hopefully) and the best way to survive is to kite the enemies into clusters and blow as many up at once.
 
 ## Dependencies
 
@@ -23,7 +23,7 @@ This project is planning on utilizing a handful of external crates to make devel
 
 - [skein](https://github.com/rust-adventure/skein): Helps with loading 3D assets and level design
 - [avian](https://github.com/Jondolf/avian): Provides physics engine
-- [bevy simple subsystem](https://github.com/TheBevyFlock/bevy_simple_subsecond_system): Better debugging with hot loading
+- [tnua](https://github.com/idanarye/bevy-tnua): Avian compatible character controller
 - [bevy asset loader](https://github.com/NiklasEi/bevy_asset_loader): For loading all assets that are not pulled from skein
 
 ## License

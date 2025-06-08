@@ -1,10 +1,9 @@
 use std::time::Duration;
 
-use avian3d::math::PI;
-use bevy::{ecs::query, input::mouse::MouseButtonInput, math::VectorSpace, prelude::*};
+use bevy::prelude::*;
 use bevy_tnua::prelude::*;
 
-use crate::player::{Player, PlayerTop};
+use crate::player::PlayerTop;
 
 #[derive(Component, Reflect, Debug)]
 #[reflect(Component)]
@@ -52,7 +51,7 @@ fn apply_movement(
     });
 }
 
-// System to manage boost timings and burnoff
+// System to manage boost timings
 fn manage_boost_time(mut player: Single<&mut crate::player::Player>, fixed_time: Res<Time<Fixed>>) {
     // Tick boost timer
     player
@@ -95,7 +94,7 @@ fn fire_control(
     top: Single<(&PlayerTop, &Transform)>,
     keyboard_input: Res<ButtonInput<MouseButton>>,
     asset_server: Res<AssetServer>,
-    mut commands: Commands,
+    commands: Commands,
 ) {
     if keyboard_input.pressed(MouseButton::Left) && player.0.fire_timer.finished() {
         let offset = Vec3::new(0.0, 5.0, 0.0);

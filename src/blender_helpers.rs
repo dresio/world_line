@@ -1,5 +1,5 @@
 use avian3d::prelude::*;
-use bevy::{gltf::GltfMeshExtras, prelude::*, reflect::DynamicTypePath, scene::SceneInstanceReady};
+use bevy::{gltf::GltfMeshExtras, prelude::*, scene::SceneInstanceReady};
 use serde::{Deserialize, Serialize};
 use serde_json;
 
@@ -37,6 +37,15 @@ pub fn load_blender_data(
                     .insert((rb_property, ColliderConstructor::TrimeshFromMesh));
             }
         }
+
+        match data.sensor {
+            Some(is_sensor) => {
+                if is_sensor {
+                    commands.entity(entity).insert(Sensor);
+                }
+            }
+            None => {} // Do nothing,
+        }
     }
 }
 
@@ -44,6 +53,7 @@ pub fn load_blender_data(
 struct BMeshExtras {
     pub collider: BCollider,
     pub rigidbody: Option<BRigidBody>,
+    pub sensor: Option<bool>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

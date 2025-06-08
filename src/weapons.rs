@@ -1,12 +1,20 @@
-use avian3d::{
-    parry::{math::Rotation, transformation::utils::transform},
-    prelude::{GravityScale, LinearVelocity, RigidBody},
+use avian3d::prelude::{
+    ColliderConstructor, CollisionEventsEnabled, GravityScale, LinearVelocity, RigidBody, Sensor,
 };
 use bevy::{
     math::ops::{cos, sin},
     prelude::*,
 };
-use std::f32::consts::PI;
+use std::time::Duration;
+
+#[derive(Component, Debug)]
+pub struct WeaponsPlugin;
+
+impl Plugin for WeaponsPlugin {
+    fn build(&self, app: &mut App) {
+        app.add_systems(FixedUpdate, manage_bullets);
+    }
+}
 
 pub struct BulletSpawnData {
     pub position: Vec3,
@@ -20,14 +28,12 @@ pub struct BulletSpawnData {
 pub struct Bullet {
     damage: f32,
     shot_from: crate::factions::Factions,
+    //Manages despawning
+    pub lifetime: Timer,
 }
 
 pub fn shoot_bullet(mut commands: Commands, data: BulletSpawnData, asset_server: Res<AssetServer>) {
-    dbg!(data.yaw);
     let vel = Vec3::new(data.speed * sin(data.yaw), 0.0, data.speed * cos(data.yaw));
-
-    dbg!(vel);
-
     commands.spawn((
         SceneRoot(asset_server.load(
             // Change this to your exported gltf file
@@ -41,5 +47,33 @@ pub fn shoot_bullet(mut commands: Commands, data: BulletSpawnData, asset_server:
         RigidBody::Dynamic,
         GravityScale(0.0), //no gravity on bullets
         LinearVelocity(vel),
+        Bullet {
+            damage: data.damage,
+            shot_from: data.shot_from,
+            lifetime: Timer::new(Duration::from_secs_f32(2.0), TimerMode::Once),
+        },
+        ColliderConstructor::Sphere { radius: (1.0) },
+        Sensor,
+        CollisionEventsEnabled,
     ));
+}
+
+// Destroys bullets after timer elapsed to prevent memory issues during long runtimes
+pub fn manage_bullets(
+    bullet_query: Query<(&mut Bullet, Entity)>,
+    fixed_time: Res<Time<Fixed>>,
+    mut commands: Commands,
+) {
+    for mut entity in bullet_query {
+        //update timer
+        entity
+            .0
+            .lifetime
+            .tick(Duration::from_secs_f32(fixed_time.delta_secs()));
+
+        // despawn if timer is finished
+        if entity.0.lifetime.finished() {
+            commands.entity(entity.1).despawn();
+        }
+    }
 }

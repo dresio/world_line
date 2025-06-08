@@ -2,6 +2,7 @@ pub mod blender_helpers;
 pub mod controls;
 pub mod enemy;
 pub mod factions;
+pub mod interactions;
 pub mod player;
 pub mod weapons;
 pub mod world;
@@ -11,7 +12,7 @@ use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::TnuaAvian3dPlugin;
 
 // Bevy blender integration
-use bevy::{prelude::*, scene::SceneInstanceReady, winit::WinitSettings};
+use bevy::prelude::*;
 use bevy_skein::SkeinPlugin;
 
 fn main() {
@@ -28,7 +29,10 @@ fn main() {
             world::World,
             player::PlayerPlugin,
             controls::Controller,
-            // PhysicsDebugPlugin::default(),
+            weapons::WeaponsPlugin,
+            interactions::InteractionsPlugin,
+            enemy::BaseEnemyPlugin,
+            PhysicsDebugPlugin::default(),
         ))
         .run();
 }

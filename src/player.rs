@@ -1,11 +1,8 @@
 use std::time::Duration;
 
-use avian3d::{parry::shape::Capsule, prelude::*};
-use bevy::{
-    ecs::identifier::Identifier, gltf::GltfMeshExtras, prelude::*, render::camera::Viewport,
-    scene::SceneInstanceReady, transform, ui::RelativeCursorPosition, winit::WinitSettings,
-};
-use bevy_tnua::{TnuaBasisContext, prelude::*};
+use avian3d::prelude::*;
+use bevy::prelude::*;
+use bevy_tnua::prelude::*;
 use std::f32::consts::PI;
 
 #[derive(Component, Reflect, Debug)]
@@ -69,12 +66,12 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
             RigidBody::Dynamic,
             LockedAxes::new().lock_rotation_y(),
             Player {
-                max_speed: 800.0,
-                nominal_speed: 100.0,
-                current_speed: 100.0,
+                max_speed: 5000.0,
+                nominal_speed: 300.0,
+                current_speed: 300.0,
                 accel: 500.0,
                 nominal_accel: 500.0,
-                boost_accel: 2000.0,
+                boost_accel: 5000.0,
                 boost_timer: Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once),
                 last_fired_gun: GunSide::Left,
                 fire_timer: Timer::new(Duration::from_secs_f32(0.5), TimerMode::Once),
@@ -84,7 +81,7 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
         .with_children(|parent| {
             parent.spawn((
                 Camera3d::default(),
-                Transform::from_xyz(150.0, 100.0, 0.0)
+                Transform::from_xyz(150.0, 150.0, 0.0)
                     .looking_at(Vec3::new(0.0, 15.0, 0.0), Vec3::Y),
             ));
         });
@@ -104,7 +101,6 @@ fn point_top(mut top: Single<(&mut Transform, &mut PlayerTop)>, window: Single<&
 
             let angle = -(center - mouse_pos).to_angle();
             let player_angle: f32 = top.0.rotation.to_euler(EulerRot::YXY).0;
-            dbg!(player_angle);
 
             top.1.yaw = angle;
 
