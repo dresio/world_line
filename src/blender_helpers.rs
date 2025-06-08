@@ -1,5 +1,5 @@
 use avian3d::prelude::*;
-use bevy::{gltf::GltfMeshExtras, prelude::*, scene::SceneInstanceReady};
+use bevy::{gltf::GltfMeshExtras, prelude::*, reflect::DynamicTypePath, scene::SceneInstanceReady};
 use serde::{Deserialize, Serialize};
 use serde_json;
 

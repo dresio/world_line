@@ -3,6 +3,7 @@ pub mod controls;
 pub mod enemy;
 pub mod factions;
 pub mod player;
+pub mod weapons;
 pub mod world;
 
 use avian3d::prelude::*;
@@ -27,7 +28,7 @@ fn main() {
             world::World,
             player::PlayerPlugin,
             controls::Controller,
-            PhysicsDebugPlugin::default(),
+            // PhysicsDebugPlugin::default(),
         ))
         .run();
 }

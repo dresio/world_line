@@ -3,7 +3,6 @@ use bevy::{
     ecs::identifier::Identifier, gltf::GltfMeshExtras, prelude::*, render::camera::Viewport,
     scene::SceneInstanceReady, transform, ui::RelativeCursorPosition, winit::WinitSettings,
 };
-use bevy_tnua::{TnuaBasisContext, prelude::*};
 
 #[derive(Component, Reflect, Debug)]
 #[reflect(Component)]
