@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use bevy::prelude::*;
+use bevy::{math::VectorSpace, prelude::*};
 use bevy_seedling::sample::SamplePlayer;
 use bevy_tnua::prelude::*;
 
@@ -28,28 +28,37 @@ fn apply_movement(
     //just_pressed
     //just_released
 
-    let mut direction = Vec3::ZERO;
-    let speed = query.1.current_speed;
+    if query.1.health > 0.0 {
+        let mut direction = Vec3::ZERO;
+        let speed = query.1.current_speed;
 
-    if keyboard_input.pressed(KeyCode::KeyA) {
-        direction.z += 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::KeyD) {
-        direction.z -= 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::KeyS) {
-        direction.x += 1.0;
-    }
-    if keyboard_input.pressed(KeyCode::KeyW) {
-        direction.x -= 1.0;
-    }
+        if keyboard_input.pressed(KeyCode::KeyA) {
+            direction.z += 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::KeyD) {
+            direction.z -= 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::KeyS) {
+            direction.x += 1.0;
+        }
+        if keyboard_input.pressed(KeyCode::KeyW) {
+            direction.x -= 1.0;
+        }
 
-    query.0.basis(TnuaBuiltinWalk {
-        desired_velocity: direction * speed,
-        float_height: 11.0,
-        acceleration: 500.0,
-        ..Default::default()
-    });
+        query.0.basis(TnuaBuiltinWalk {
+            desired_velocity: direction * speed,
+            float_height: 11.0,
+            acceleration: 500.0,
+            ..Default::default()
+        });
+    } else {
+        query.0.basis(TnuaBuiltinWalk {
+            desired_velocity: Vec3::ZERO,
+            float_height: 11.0,
+            acceleration: 500.0,
+            ..Default::default()
+        });
+    }
 }
 
 // System to manage boost timings
@@ -97,26 +106,28 @@ fn fire_control(
     mut asset_server: Res<AssetServer>,
     mut commands: Commands,
 ) {
-    if keyboard_input.pressed(MouseButton::Left) && player.0.fire_timer.finished() {
-        let offset = Vec3::new(0.0, 5.0, 0.0);
+    if player.0.health > 0.0 {
+        if keyboard_input.pressed(MouseButton::Left) && player.0.fire_timer.finished() {
+            let offset = Vec3::new(0.0, 5.0, 0.0);
 
-        if player.0.last_fired_gun == crate::player::GunSide::Left {
-            //will shoot from right gun
-        } else {
-            //will shoot from left gun
+            if player.0.last_fired_gun == crate::player::GunSide::Left {
+                //will shoot from right gun
+            } else {
+                //will shoot from left gun
+            }
+
+            let bullet_data = crate::weapons::BulletSpawnData {
+                position: player.1.translation + offset,
+                yaw: top.0.yaw,
+                speed: 1000.0,
+                damage: 10.0,
+                shot_from: crate::factions::Factions::Player,
+            };
+
+            crate::weapons::shoot_bullet(&mut commands, bullet_data, &mut asset_server);
+
+            player.0.fire_timer.reset();
+            commands.spawn(SamplePlayer::new(asset_server.load("MechBullet.wav")));
         }
-
-        let bullet_data = crate::weapons::BulletSpawnData {
-            position: player.1.translation + offset,
-            yaw: top.0.yaw,
-            speed: 1000.0,
-            damage: 10.0,
-            shot_from: crate::factions::Factions::Player,
-        };
-
-        crate::weapons::shoot_bullet(&mut commands, bullet_data, &mut asset_server);
-
-        player.0.fire_timer.reset();
-        commands.spawn(SamplePlayer::new(asset_server.load("MechBullet.wav")));
     }
 }

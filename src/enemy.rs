@@ -54,7 +54,7 @@ pub fn manage_enemy(
             vec2(player.translation.x, player.translation.y),
         );
 
-        enemy.0.speed = (range - 70.0) / 10.0;
+        enemy.0.speed = (range - 70.0) / 5.0;
         if enemy.0.speed < 0.0 {
             enemy.0.speed = 0.0;
         }
@@ -163,7 +163,7 @@ pub fn spawn_enemy(mut commands: Commands, asset_server: Res<AssetServer>, locat
             faction: crate::factions::Factions::Dominion,
             speed: 5.0,
             turn_rate: f32::to_radians(50.0),
-            fire_timer: Timer::new(Duration::from_secs_f32(10.0), TimerMode::Once),
+            fire_timer: Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once),
         },
     ));
 }
