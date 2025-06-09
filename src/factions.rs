@@ -68,7 +68,7 @@ struct RelationshipState {
     social: i32,
 }
 
-#[derive(Debug, Reflect)]
+#[derive(Debug, Reflect, PartialEq)]
 pub enum Factions {
     Technocrat,
     Nomad,

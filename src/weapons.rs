@@ -26,10 +26,17 @@ pub struct BulletSpawnData {
 
 #[derive(Component, Debug)]
 pub struct Bullet {
-    damage: f32,
-    shot_from: crate::factions::Factions,
+    pub damage: f32,
+    pub shot_from: crate::factions::Factions,
     //Manages despawning
     pub lifetime: Timer,
+}
+
+#[derive(Component, Debug)]
+pub struct Explosion {
+    pub max_scale: f32,
+    pub lifetime: Timer,
+    pub duration: f32,
 }
 
 pub fn shoot_bullet(mut commands: Commands, data: BulletSpawnData, asset_server: Res<AssetServer>) {

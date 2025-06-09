@@ -72,16 +72,16 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 accel: 500.0,
                 nominal_accel: 500.0,
                 boost_accel: 5000.0,
-                boost_timer: Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once),
+                boost_timer: Timer::new(Duration::from_secs_f32(1.0), TimerMode::Once),
                 last_fired_gun: GunSide::Left,
-                fire_timer: Timer::new(Duration::from_secs_f32(0.5), TimerMode::Once),
+                fire_timer: Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once),
             },
         ))
         //Add camera as child for camera position
         .with_children(|parent| {
             parent.spawn((
                 Camera3d::default(),
-                Transform::from_xyz(150.0, 150.0, 0.0)
+                Transform::from_xyz(150.0, 300.0, 0.0)
                     .looking_at(Vec3::new(0.0, 15.0, 0.0), Vec3::Y),
             ));
         });
@@ -132,4 +132,8 @@ fn point_bottom(
 
         bot.0.rotate_y(delta);
     }
+}
+
+fn debug_player_pos(query: Single<&Transform, With<Player>>) {
+    dbg!(query.translation);
 }

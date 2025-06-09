@@ -1,6 +1,6 @@
 use avian3d::{math::PI, prelude::*};
 use bevy::{
-    math::ops::{cos, sin},
+    math::ops::{cos, powf, sin, sqrt},
     prelude::*,
 };
 use bevy_tnua::{
@@ -13,7 +13,7 @@ pub struct BaseEnemyPlugin;
 
 impl Plugin for BaseEnemyPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, spawn_enemy)
+        app.add_systems(FixedUpdate, runtime_enemy_gen)
             .add_systems(FixedUpdate, manage_enemy);
     }
 }
@@ -37,6 +37,17 @@ pub fn manage_enemy(
     fixed_time: Res<Time<Fixed>>,
 ) {
     for mut enemy in query {
+        // get range to player
+        let range = calc_distance(
+            vec2(enemy.1.translation.x, enemy.1.translation.z),
+            vec2(player.translation.x, player.translation.y),
+        );
+
+        enemy.0.speed = (range - 70.0) / 10.0;
+        if enemy.0.speed < 0.0 {
+            enemy.0.speed = 0.0;
+        }
+
         // Manage rotation
         let player_transform = player.translation;
         let this_transform = enemy.1.translation;
@@ -71,10 +82,45 @@ pub fn manage_enemy(
             acceleration: 10.0,
             ..Default::default()
         });
+
+        //if within range, fire bullet (slowly)
+        if range < 50.0 {
+            //shoot at player
+        }
     }
 }
 
-pub fn spawn_enemy(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn runtime_enemy_gen(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
+    player: Single<&Transform, With<crate::player::Player>>,
+    enemies: Query<&Enemy>,
+    time: Res<Time<Real>>,
+) {
+    let count = enemies.iter().count();
+    let max_count = (time.elapsed().as_secs_f32()) as usize; //allow 1 new tank every second
+
+    if count < max_count {
+        let mut point = crate::world::sample_random_point() + vec3(0.0, 10.0, 0.0);
+
+        while calc_distance(
+            vec2(point.x, point.z),
+            vec2(player.translation.x, player.translation.y),
+        ) < 100.0
+        {
+            point = crate::world::sample_random_point(); //just check if it is within visual range
+        }
+
+        spawn_enemy(commands, asset_server, point);
+    }
+}
+
+fn calc_distance(start: Vec2, end: Vec2) -> f32 {
+    let delta = end - start;
+    sqrt(powf(delta.x, 2.0) + powf(delta.y, 2.0))
+}
+
+pub fn spawn_enemy(mut commands: Commands, asset_server: Res<AssetServer>, location: Vec3) {
     //Spawns single enemy object
     commands.spawn((
         SceneRoot(asset_server.load(
@@ -85,7 +131,7 @@ pub fn spawn_enemy(mut commands: Commands, asset_server: Res<AssetServer>) {
             radius: (10.0),
             height: (20.0),
         },
-        Transform::from_xyz(30.0, 20.0, 0.0),
+        Transform::from_translation(location),
         ColliderDensity(10.0),
         TnuaController::default(),
         TnuaGravity(Vec3::new(0.0, -50.0, 0.0)),

@@ -1,5 +1,6 @@
 use avian3d::math::PI;
 use bevy::prelude::*;
+use rand::Rng;
 
 pub struct World;
 
@@ -33,4 +34,15 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
             GltfAssetLabel::Scene(1).from_asset("TestScene.glb"),
         )))
         .observe(crate::blender_helpers::load_blender_data);
+}
+
+pub fn sample_random_point() -> Vec3 {
+    let x_range = (-800.0, 800.0);
+    let y_range = (-800.0, 800.0);
+
+    Vec3 {
+        x: rand::rng().random_range(x_range.0..x_range.1),
+        y: 0.0,
+        z: rand::rng().random_range(y_range.0..y_range.1),
+    }
 }

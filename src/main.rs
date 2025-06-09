@@ -32,7 +32,7 @@ fn main() {
             weapons::WeaponsPlugin,
             interactions::InteractionsPlugin,
             enemy::BaseEnemyPlugin,
-            PhysicsDebugPlugin::default(),
+            // PhysicsDebugPlugin::default(),
         ))
         .run();
 }

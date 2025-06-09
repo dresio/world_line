@@ -1,10 +1,25 @@
+use std::time::Duration;
+
 use bevy::{
-    ecs::observer::TriggerTargets, prelude::*, text::cosmic_text::ttf_parser::Width, transform,
+    color::palettes::tailwind::RED_400,
+    ecs::observer::TriggerTargets,
+    pbr::ExtendedMaterial,
+    prelude::*,
+    render::mesh::{SphereKind, SphereMeshBuilder},
+    text::cosmic_text::ttf_parser::Width,
+    transform,
 };
 
-use avian3d::{parry::query, prelude::CollisionStarted};
+use avian3d::{
+    parry::query,
+    prelude::{ColliderConstructor, CollisionEventsEnabled, CollisionStarted, RigidBody, Sensor},
+};
 
-use crate::{enemy::Enemy, weapons::Bullet};
+use crate::{
+    enemy::Enemy,
+    player::Player,
+    weapons::{Bullet, Explosion},
+};
 
 #[derive(Component, Reflect, Debug)]
 #[reflect(Component)]
@@ -12,29 +27,117 @@ pub struct InteractionsPlugin;
 
 impl Plugin for InteractionsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, print_started_collisions);
+        app.add_systems(Update, manage_shot_bullets)
+            .add_systems(FixedUpdate, (manage_explosion, manage_explosion_contacts));
     }
 }
 
-fn print_started_collisions(
+fn manage_shot_bullets(
     mut collision_event_reader: EventReader<CollisionStarted>,
     query_enemies: Query<(Entity, &Transform), With<Enemy>>,
-    query_bullets: Query<Entity, With<Bullet>>,
+    query_bullets: Query<(Entity, &Bullet)>,
+    query_players: Query<(Entity, &mut Player)>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
     mut command: Commands,
 ) {
     for CollisionStarted(entity1, entity2) in collision_event_reader.read() {
         if query_enemies.contains(*entity1) && query_bullets.contains(*entity2) {
             let transform = query_enemies.get(*entity1).unwrap().1;
+            let is_hit = query_bullets.get(*entity2).unwrap().1.shot_from
+                == crate::factions::Factions::Player;
 
-            //Despawn bullet and enemy
-            command.entity(*entity1).despawn();
-            command.entity(*entity2).despawn();
+            if is_hit {
+                //Despawn bullet and enemy
+                command.entity(*entity1).despawn();
+                command.entity(*entity2).despawn();
 
-            create_explosion(&mut command, transform);
+                create_explosion(&mut command, transform, &mut meshes, &mut materials);
+            }
         }
     }
 }
 
-fn create_explosion(mut command: &mut Commands, position: &Transform) {
-    println!("BOOM");
+fn manage_explosion_contacts(
+    mut collision_event_reader: EventReader<CollisionStarted>,
+    query_enemies: Query<(Entity, &Transform), With<Enemy>>,
+    query_explosions: Query<Entity, With<Explosion>>,
+    mut meshes: ResMut<Assets<Mesh>>,
+    mut materials: ResMut<Assets<StandardMaterial>>,
+    mut command: Commands,
+) {
+    for CollisionStarted(entity1, entity2) in collision_event_reader.read() {
+        if query_enemies.contains(*entity1) && query_explosions.contains(*entity2) {
+            let transform = query_enemies.get(*entity1).unwrap().1;
+
+            command.entity(*entity1).despawn();
+            create_explosion(&mut command, transform, &mut meshes, &mut materials);
+        }
+        if query_enemies.contains(*entity2) && query_explosions.contains(*entity1) {
+            let transform = query_enemies.get(*entity2).unwrap().1;
+
+            command.entity(*entity2).despawn();
+            create_explosion(&mut command, transform, &mut meshes, &mut materials);
+        }
+    }
+}
+
+fn manage_explosion(
+    mut explosions: Query<(&mut Transform, &mut Explosion, Entity)>,
+    fixed_time: Res<Time<Fixed>>,
+    mut command: Commands,
+) {
+    for mut explosion in explosions {
+        explosion
+            .1
+            .lifetime
+            .tick(Duration::from_secs_f32(fixed_time.delta_secs())); //tick the timer
+
+        //scale according to timer
+        let mut proportion = explosion.1.lifetime.elapsed_secs() / explosion.1.duration;
+        // dbg!(explosion.1.lifetime.duration().as_secs_f32());
+        if proportion > 1.0 {
+            proportion = 1.0;
+        }
+
+        let scalar = proportion * explosion.1.max_scale;
+        let scale = Vec3::ONE * scalar;
+
+        explosion.0.scale = scale;
+
+        if explosion.1.lifetime.finished() {
+            command.entity(explosion.2).despawn();
+        }
+    }
+}
+
+fn create_explosion(
+    mut command: &mut Commands,
+    position: &Transform,
+    meshes: &mut ResMut<Assets<Mesh>>,
+    materials: &mut ResMut<Assets<StandardMaterial>>,
+) {
+    command.spawn((
+        Mesh3d(meshes.add(SphereMeshBuilder::new(
+            5.0,
+            SphereKind::Uv {
+                sectors: 20,
+                stacks: 20,
+            },
+        ))),
+        Transform::from_translation(position.translation),
+        MeshMaterial3d(materials.add(StandardMaterial {
+            base_color: RED_400.into(),
+            ..default()
+        })),
+        ColliderConstructor::Sphere { radius: 5.0 },
+        RigidBody::Dynamic,
+        Sensor,
+        CollisionEventsEnabled,
+        crate::weapons::Explosion {
+            max_scale: 10.0,
+            lifetime: Timer::new(Duration::from_secs_f32(1.0), TimerMode::Once),
+            duration: 0.3,
+        },
+    ));
 }
