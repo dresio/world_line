@@ -14,11 +14,15 @@ use avian3d::{
     parry::query,
     prelude::{ColliderConstructor, CollisionEventsEnabled, CollisionStarted, RigidBody, Sensor},
 };
-use bevy_seedling::sample::SamplePlayer;
+use bevy_seedling::{
+    prelude::{Volume, VolumeNode},
+    sample::SamplePlayer,
+    sample_effects,
+};
 
 use crate::{
     enemy::Enemy,
-    player::Player,
+    player::{self, Player},
     weapons::{Bullet, Explosion},
 };
 
@@ -28,12 +32,12 @@ pub struct InteractionsPlugin;
 
 impl Plugin for InteractionsPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Update, manage_shot_bullets)
+        app.add_systems(Update, manage_collisions_bullets)
             .add_systems(FixedUpdate, (manage_explosion, manage_explosion_contacts));
     }
 }
 
-fn manage_shot_bullets(
+fn manage_collisions_bullets(
     mut collision_event_reader: EventReader<CollisionStarted>,
     query_enemies: Query<(Entity, &Transform), With<Enemy>>,
     query_bullets: Query<(Entity, &Bullet)>,
@@ -61,6 +65,7 @@ fn manage_shot_bullets(
                     &mut materials,
                     &mut server,
                 );
+                player.1.score += 1;
             }
         }
 
@@ -72,8 +77,18 @@ fn manage_shot_bullets(
                 //Despawn bullet and enemy
                 command.entity(*entity2).despawn();
                 player.1.health -= query_bullets.get(*entity2).unwrap().1.damage;
+                command.spawn(SamplePlayer::new(server.load("DamageTaken.wav")));
             }
         }
+
+        if player.0 == *entity1 && query_enemies.contains(*entity2) {
+            player.1.health -= 5.0;
+            command.spawn(SamplePlayer::new(server.load("BumpDamage.wav")));
+        } else if player.0 == *entity2 && query_enemies.contains(*entity1) {
+            player.1.health -= 5.0;
+            command.spawn(SamplePlayer::new(server.load("BumpDamage.wav")));
+        }
+        {}
     }
 }
 
@@ -81,6 +96,7 @@ fn manage_explosion_contacts(
     mut collision_event_reader: EventReader<CollisionStarted>,
     query_enemies: Query<(Entity, &Transform), With<Enemy>>,
     query_explosions: Query<Entity, With<Explosion>>,
+    mut player: Single<&mut Player>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut server: Res<AssetServer>,
@@ -98,6 +114,7 @@ fn manage_explosion_contacts(
                 &mut materials,
                 &mut server,
             );
+            player.score += 1;
         }
         if query_enemies.contains(*entity2) && query_explosions.contains(*entity1) {
             let transform = query_enemies.get(*entity2).unwrap().1;
@@ -110,6 +127,7 @@ fn manage_explosion_contacts(
                 &mut materials,
                 &mut server,
             );
+            player.score += 1;
         }
     }
 }
@@ -173,5 +191,8 @@ fn create_explosion(
             duration: 0.3,
         },
         SamplePlayer::new(server.load("Explosion.wav")),
+        sample_effects![VolumeNode {
+            volume: Volume::Decibels(-10.0)
+        }],
     ));
 }

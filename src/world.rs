@@ -5,13 +5,13 @@ use crate::player::{self, Player};
 
 pub struct World;
 
-impl Plugin for World {
-    fn build(&self, app: &mut App) {
-        app.add_systems(Startup, startup);
-    }
-}
+// impl Plugin for World {
+//     fn build(&self, app: &mut App) {
+//         app.add_systems(Startup, startup);
+//     }
+// }
 
-fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
+pub fn startup(commands: &mut Commands, asset_server: &mut Res<AssetServer>) {
     //Basic light
     commands.spawn((
         DirectionalLight {

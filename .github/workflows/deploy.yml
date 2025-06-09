@@ -30,6 +30,7 @@ jobs:
       - name: Install dependencies
         run: |
           cargo install --git https://github.com/TheBevyFlock/bevy_cli --tag cli-v0.1.0-alpha.1 --locked bevy_cli
+          sudo apt install libxcb-render0-dev libxcb-shape0-dev libxcb-xfixes0-dev
           rustup target add wasm32-unknown-unknown
           cargo install wasm-bindgen-cli
           cargo install wasm-opt

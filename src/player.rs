@@ -1,9 +1,12 @@
 use std::{sync::Arc, thread::current, time::Duration};
 
 use avian3d::prelude::*;
-use bevy::prelude::*;
+use bevy::{ecs::system::command, prelude::*};
+use bevy_egui::{EguiContextPass, EguiContexts, egui};
 use bevy_tnua::prelude::*;
 use std::f32::consts::PI;
+
+use crate::world;
 
 #[derive(Component, Reflect, Debug)]
 #[reflect(Component)]
@@ -22,7 +25,8 @@ impl Plugin for PlayerPlugin {
     fn build(&self, app: &mut App) {
         app.add_systems(Startup, spawn_player)
             .add_systems(Update, point_top)
-            .add_systems(Update, point_bottom);
+            .add_systems(Update, point_bottom)
+            .add_systems(EguiContextPass, player_ui);
     }
 }
 
@@ -43,6 +47,7 @@ pub struct Player {
 
     pub health: f32,
     pub enemy_seed: f32,
+    pub score: u128,
 }
 
 #[derive(Debug, PartialEq)]
@@ -52,7 +57,9 @@ pub enum GunSide {
 }
 
 // Create player object from bevy_skein, put camera on it, and attach player controller
-fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
+fn spawn_player(mut commands: Commands, mut asset_server: Res<AssetServer>) {
+    world::startup(&mut commands, &mut asset_server);
+
     //Spawns player object
     commands
         .spawn((
@@ -80,7 +87,9 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 fire_timer: Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once),
                 health: 100.0,
                 enemy_seed: 0.0,
+                score: 0,
             },
+            CollisionEventsEnabled,
         ))
         //Add camera as child for camera position
         .with_children(|parent| {
@@ -141,4 +150,17 @@ fn point_bottom(
 
 fn debug_player_pos(query: Single<&Transform, With<Player>>) {
     dbg!(query.translation);
+}
+
+fn player_ui(mut contexts: EguiContexts, player: Single<&Player>) {
+    let health = player.health;
+    let boost_cooldown = 1.0 - player.boost_timer.elapsed_secs();
+    let fire_cooldown = 5.0 - player.fire_timer.elapsed_secs();
+    let score = player.score;
+    egui::Window::new("UI").show(contexts.ctx_mut(), |ui| {
+        ui.label(format!("Health: {health}"));
+        ui.label(format!("Boost Cooldown: {:.2}", boost_cooldown));
+        ui.label(format!("Reload Time Left: {:.2}", fire_cooldown));
+        ui.label(format!("Score: {score}"));
+    });
 }
