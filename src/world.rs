@@ -41,7 +41,7 @@ pub fn sample_random_point(mut player: &mut Player) -> Vec3 {
     let x_range = (-800.0, 800.0);
     let y_range = (-800.0, 800.0);
 
-    // Can't figure out the random number system...
+    // Can't figure out the random number system on web...
     player.enemy_seed = (player.enemy_seed + 231423412.4524325432f32) % 1600.0;
     let seed_x = player.enemy_seed;
     player.enemy_seed = (player.enemy_seed + 231423412.4524325432f32) % 1600.0;
