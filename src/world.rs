@@ -1,6 +1,7 @@
 use avian3d::math::PI;
 use bevy::prelude::*;
-use rand::Rng;
+
+use crate::player::{self, Player};
 
 pub struct World;
 
@@ -36,13 +37,19 @@ fn startup(mut commands: Commands, asset_server: Res<AssetServer>) {
         .observe(crate::blender_helpers::load_blender_data);
 }
 
-pub fn sample_random_point() -> Vec3 {
+pub fn sample_random_point(mut player: &mut Player) -> Vec3 {
     let x_range = (-800.0, 800.0);
     let y_range = (-800.0, 800.0);
 
+    // Can't figure out the random number system...
+    player.enemy_seed = (player.enemy_seed + 231423412.4524325432f32) % 1600.0;
+    let seed_x = player.enemy_seed;
+    player.enemy_seed = (player.enemy_seed + 231423412.4524325432f32) % 1600.0;
+    let seed_y = player.enemy_seed;
+
     Vec3 {
-        x: rand::rng().random_range(x_range.0..x_range.1),
+        x: seed_x - 800.0,
         y: 0.0,
-        z: rand::rng().random_range(y_range.0..y_range.1),
+        z: seed_y - 800.0,
     }
 }

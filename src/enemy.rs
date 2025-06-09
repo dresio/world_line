@@ -114,7 +114,7 @@ pub fn manage_enemy(
 pub fn runtime_enemy_gen(
     mut commands: Commands,
     asset_server: Res<AssetServer>,
-    player: Single<&Transform, With<crate::player::Player>>,
+    mut player: Single<(&Transform, &mut crate::player::Player)>,
     enemies: Query<&Enemy>,
     time: Res<Time<Real>>,
 ) {
@@ -122,14 +122,14 @@ pub fn runtime_enemy_gen(
     let max_count = (time.elapsed().as_secs_f32()) as usize; //allow 1 new tank every second
 
     if count < max_count {
-        let mut point = crate::world::sample_random_point() + vec3(0.0, 10.0, 0.0);
+        let mut point = crate::world::sample_random_point(&mut player.1) + vec3(0.0, 10.0, 0.0);
 
         while calc_distance(
             vec2(point.x, point.z),
-            vec2(player.translation.x, player.translation.y),
+            vec2(player.0.translation.x, player.0.translation.y),
         ) < 100.0
         {
-            point = crate::world::sample_random_point(); //just check if it is within visual range
+            point = crate::world::sample_random_point(&mut player.1); //just check if it is within visual range
         }
 
         spawn_enemy(commands, asset_server, point);
@@ -163,7 +163,7 @@ pub fn spawn_enemy(mut commands: Commands, asset_server: Res<AssetServer>, locat
             faction: crate::factions::Factions::Dominion,
             speed: 5.0,
             turn_rate: f32::to_radians(50.0),
-            fire_timer: Timer::new(Duration::from_secs_f32(30.0), TimerMode::Once),
+            fire_timer: Timer::new(Duration::from_secs_f32(10.0), TimerMode::Once),
         },
     ));
 }

@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use bevy::prelude::*;
+use bevy_seedling::sample::SamplePlayer;
 use bevy_tnua::prelude::*;
 
 use crate::player::PlayerTop;
@@ -116,5 +117,6 @@ fn fire_control(
         crate::weapons::shoot_bullet(&mut commands, bullet_data, &mut asset_server);
 
         player.0.fire_timer.reset();
+        commands.spawn(SamplePlayer::new(asset_server.load("MechBullet.wav")));
     }
 }

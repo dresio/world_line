@@ -25,8 +25,6 @@ serde = { version = "1.0.219", features = ["derive"] }
 serde_json = "1.0.140"
 bevy_seedling = "0.4.1"
 rand = "0.9.1"
-getrandom = { version = "0.3", features = ["wasm_js"] } 
-
 
 
 # Idiomatic Bevy code often triggers these lints, and the CI workflow treats them as errors.

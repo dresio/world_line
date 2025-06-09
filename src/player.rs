@@ -1,4 +1,4 @@
-use std::time::Duration;
+use std::{sync::Arc, thread::current, time::Duration};
 
 use avian3d::prelude::*;
 use bevy::prelude::*;
@@ -41,8 +41,8 @@ pub struct Player {
     pub last_fired_gun: GunSide,
     pub fire_timer: Timer,
 
-    // Player health
-    pub health: u16,
+    pub health: f32,
+    pub enemy_seed: f32,
 }
 
 #[derive(Debug, PartialEq)]
@@ -78,7 +78,8 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 boost_timer: Timer::new(Duration::from_secs_f32(1.0), TimerMode::Once),
                 last_fired_gun: GunSide::Left,
                 fire_timer: Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once),
-                health: 100,
+                health: 100.0,
+                enemy_seed: 0.0,
             },
         ))
         //Add camera as child for camera position

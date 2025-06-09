@@ -37,7 +37,7 @@ fn manage_shot_bullets(
     mut collision_event_reader: EventReader<CollisionStarted>,
     query_enemies: Query<(Entity, &Transform), With<Enemy>>,
     query_bullets: Query<(Entity, &Bullet)>,
-    query_players: Query<(Entity, &mut Player)>,
+    mut player: Single<(Entity, &mut Player)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
     mut server: Res<AssetServer>,
@@ -61,6 +61,17 @@ fn manage_shot_bullets(
                     &mut materials,
                     &mut server,
                 );
+            }
+        }
+
+        if player.0 == *entity1 && query_bullets.contains(*entity2) {
+            let is_hit = query_bullets.get(*entity2).unwrap().1.shot_from
+                == crate::factions::Factions::Dominion;
+
+            if is_hit {
+                //Despawn bullet and enemy
+                command.entity(*entity2).despawn();
+                player.1.health -= query_bullets.get(*entity2).unwrap().1.damage;
             }
         }
     }
