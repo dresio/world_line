@@ -93,8 +93,8 @@ fn fire_control(
     mut player: Single<(&mut crate::player::Player, &Transform)>,
     top: Single<(&PlayerTop, &Transform)>,
     keyboard_input: Res<ButtonInput<MouseButton>>,
-    asset_server: Res<AssetServer>,
-    commands: Commands,
+    mut asset_server: Res<AssetServer>,
+    mut commands: Commands,
 ) {
     if keyboard_input.pressed(MouseButton::Left) && player.0.fire_timer.finished() {
         let offset = Vec3::new(0.0, 5.0, 0.0);
@@ -113,7 +113,7 @@ fn fire_control(
             shot_from: crate::factions::Factions::Player,
         };
 
-        crate::weapons::shoot_bullet(commands, bullet_data, asset_server);
+        crate::weapons::shoot_bullet(&mut commands, bullet_data, &mut asset_server);
 
         player.0.fire_timer.reset();
     }

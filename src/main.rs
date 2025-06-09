@@ -8,6 +8,7 @@ pub mod weapons;
 pub mod world;
 
 use avian3d::prelude::*;
+use bevy_seedling::prelude::*;
 use bevy_tnua::prelude::*;
 use bevy_tnua_avian3d::TnuaAvian3dPlugin;
 
@@ -32,7 +33,12 @@ fn main() {
             weapons::WeaponsPlugin,
             interactions::InteractionsPlugin,
             enemy::BaseEnemyPlugin,
-            // PhysicsDebugPlugin::default(),
+            SeedlingPlugin::default(), // PhysicsDebugPlugin::default(),
         ))
+        .add_systems(Startup, play_music)
         .run();
+}
+
+fn play_music(mut commands: Commands, server: Res<AssetServer>) {
+    commands.spawn(SamplePlayer::new(server.load("Test.wav")).looping());
 }

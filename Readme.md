@@ -17,6 +17,10 @@ The theme of this game jam is Chain Reaction, ~~and I am hoping to hit this in t
 
 This utilizes the [Bevy CLI](https://github.com/TheBevyFlock/bevy_cli) for runtime. Use `bevy run --release web --open` to run it in your local browser. This should also be accessible on [Itch.io](https://dresio.itch.io/world-line) and [Github Pages](https://dresio.github.io/world_line).
 
+## Credits
+
+Credit for the music and sfx goes to my unnamed friend who I forced the role onto
+
 ## Extra Crates
 
 This project is planning on utilizing a handful of external crates to make development more streamlined for the game jam.

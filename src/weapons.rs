@@ -39,7 +39,11 @@ pub struct Explosion {
     pub duration: f32,
 }
 
-pub fn shoot_bullet(mut commands: Commands, data: BulletSpawnData, asset_server: Res<AssetServer>) {
+pub fn shoot_bullet(
+    mut commands: &mut Commands,
+    data: BulletSpawnData,
+    asset_server: &mut Res<AssetServer>,
+) {
     let vel = Vec3::new(data.speed * sin(data.yaw), 0.0, data.speed * cos(data.yaw));
     commands.spawn((
         SceneRoot(asset_server.load(

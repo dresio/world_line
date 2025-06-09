@@ -40,6 +40,9 @@ pub struct Player {
     // Firing params
     pub last_fired_gun: GunSide,
     pub fire_timer: Timer,
+
+    // Player health
+    pub health: u16,
 }
 
 #[derive(Debug, PartialEq)]
@@ -61,7 +64,7 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 radius: (15.0),
                 height: (15.0),
             },
-            Transform::from_xyz(0.0, 20.0, 0.0),
+            Transform::from_xyz(0.0, 50.0, 0.0),
             TnuaController::default(),
             RigidBody::Dynamic,
             LockedAxes::new().lock_rotation_y(),
@@ -75,6 +78,7 @@ fn spawn_player(mut commands: Commands, asset_server: Res<AssetServer>) {
                 boost_timer: Timer::new(Duration::from_secs_f32(1.0), TimerMode::Once),
                 last_fired_gun: GunSide::Left,
                 fire_timer: Timer::new(Duration::from_secs_f32(5.0), TimerMode::Once),
+                health: 100,
             },
         ))
         //Add camera as child for camera position

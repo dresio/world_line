@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use avian3d::{math::PI, prelude::*};
 use bevy::{
     math::ops::{cos, powf, sin, sqrt},
@@ -25,6 +27,8 @@ pub struct Enemy {
     faction: crate::factions::Factions,
     speed: f32,
     turn_rate: f32,
+
+    fire_timer: Timer,
 }
 
 // Gets enemy from
@@ -35,8 +39,15 @@ pub fn manage_enemy(
     >,
     player: Single<&Transform, With<crate::player::Player>>,
     fixed_time: Res<Time<Fixed>>,
+    mut asset_server: Res<AssetServer>,
+    mut commands: Commands,
 ) {
     for mut enemy in query {
+        enemy
+            .0
+            .fire_timer
+            .tick(Duration::from_secs_f32(fixed_time.delta_secs()));
+
         // get range to player
         let range = calc_distance(
             vec2(enemy.1.translation.x, enemy.1.translation.z),
@@ -83,9 +94,19 @@ pub fn manage_enemy(
             ..Default::default()
         });
 
-        //if within range, fire bullet (slowly)
-        if range < 50.0 {
-            //shoot at player
+        if enemy.0.fire_timer.finished() {
+            //spawn bullet
+            let bullet_data = crate::weapons::BulletSpawnData {
+                position: enemy.1.translation,
+                yaw: current_yaw,
+                speed: 300.0,
+                damage: 1.0,
+                shot_from: crate::factions::Factions::Dominion,
+            };
+
+            crate::weapons::shoot_bullet(&mut commands, bullet_data, &mut asset_server);
+
+            enemy.0.fire_timer.reset();
         }
     }
 }
@@ -142,6 +163,7 @@ pub fn spawn_enemy(mut commands: Commands, asset_server: Res<AssetServer>, locat
             faction: crate::factions::Factions::Dominion,
             speed: 5.0,
             turn_rate: f32::to_radians(50.0),
+            fire_timer: Timer::new(Duration::from_secs_f32(30.0), TimerMode::Once),
         },
     ));
 }

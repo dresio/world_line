@@ -14,6 +14,7 @@ use avian3d::{
     parry::query,
     prelude::{ColliderConstructor, CollisionEventsEnabled, CollisionStarted, RigidBody, Sensor},
 };
+use bevy_seedling::sample::SamplePlayer;
 
 use crate::{
     enemy::Enemy,
@@ -39,6 +40,7 @@ fn manage_shot_bullets(
     query_players: Query<(Entity, &mut Player)>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut server: Res<AssetServer>,
     mut command: Commands,
 ) {
     for CollisionStarted(entity1, entity2) in collision_event_reader.read() {
@@ -52,7 +54,13 @@ fn manage_shot_bullets(
                 command.entity(*entity1).despawn();
                 command.entity(*entity2).despawn();
 
-                create_explosion(&mut command, transform, &mut meshes, &mut materials);
+                create_explosion(
+                    &mut command,
+                    transform,
+                    &mut meshes,
+                    &mut materials,
+                    &mut server,
+                );
             }
         }
     }
@@ -64,6 +72,7 @@ fn manage_explosion_contacts(
     query_explosions: Query<Entity, With<Explosion>>,
     mut meshes: ResMut<Assets<Mesh>>,
     mut materials: ResMut<Assets<StandardMaterial>>,
+    mut server: Res<AssetServer>,
     mut command: Commands,
 ) {
     for CollisionStarted(entity1, entity2) in collision_event_reader.read() {
@@ -71,13 +80,25 @@ fn manage_explosion_contacts(
             let transform = query_enemies.get(*entity1).unwrap().1;
 
             command.entity(*entity1).despawn();
-            create_explosion(&mut command, transform, &mut meshes, &mut materials);
+            create_explosion(
+                &mut command,
+                transform,
+                &mut meshes,
+                &mut materials,
+                &mut server,
+            );
         }
         if query_enemies.contains(*entity2) && query_explosions.contains(*entity1) {
             let transform = query_enemies.get(*entity2).unwrap().1;
 
             command.entity(*entity2).despawn();
-            create_explosion(&mut command, transform, &mut meshes, &mut materials);
+            create_explosion(
+                &mut command,
+                transform,
+                &mut meshes,
+                &mut materials,
+                &mut server,
+            );
         }
     }
 }
@@ -116,6 +137,7 @@ fn create_explosion(
     position: &Transform,
     meshes: &mut ResMut<Assets<Mesh>>,
     materials: &mut ResMut<Assets<StandardMaterial>>,
+    server: &mut Res<AssetServer>,
 ) {
     command.spawn((
         Mesh3d(meshes.add(SphereMeshBuilder::new(
@@ -139,5 +161,6 @@ fn create_explosion(
             lifetime: Timer::new(Duration::from_secs_f32(1.0), TimerMode::Once),
             duration: 0.3,
         },
+        SamplePlayer::new(server.load("Explosion.wav")),
     ));
 }
